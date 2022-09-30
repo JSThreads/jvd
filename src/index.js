@@ -4,8 +4,10 @@ class vDOM {
     // HTML 5 syntaxe requestemenets
     SELF_CLOSE = ['base', 'meta', 'link', 'br', 'hr', 'img', 'area', 'input', 'col', 'param', 'wbr'] 
 
-    nextChild(el) {
-        
+    childToDOM(el) {
+        el.childs.forEach(childEl => {
+            this.childToDOM(childEl)
+        });
     }
     HtmlTovDOM(html) {
         // delete comments 
@@ -34,9 +36,8 @@ class vDOM {
         ]
 
         // link
-        tmpDOM.forEach(el => {
-            this.virtualDOM.push(el);
-
-        })
+        for (var i = 0; i < tmpDOM.length; i++) {
+            
+        }
     }
 }
