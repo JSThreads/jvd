@@ -4,12 +4,20 @@ class vDOM {
     // HTML 5 syntaxe requestemenets
     SELF_CLOSE = ['base', 'meta', 'link', 'br', 'hr', 'img', 'area', 'input', 'col', 'param', 'wbr'] 
 
-    childToDOM(el) {
-        el.childs.forEach(childEl => {
-            this.childToDOM(childEl)
-        });
+    childToDOM(idx, tmpDOM) {
+        if (tmpDOM[idx].type == 'text') {
+            return 0;
+        }
+        var totChilds = tmpDOM[idx].opt.childs.length;
+
+        for (var i = 0; i < tmpDOM[idx].opt.childs.length; i++) {
+            totChilds += this.childToDOM(tmpDOM[idx].opt.childs[i], tmpDOM)
+            tmpDOM[idx].opt.childs[i] = tmpDOM[tmpDOM[idx].opt.childs[i]];
+        }
+
+        return totChilds;
     }
-    HtmlTovDOM(html) {
+    HtmlTovDOM(html = '') {
         // delete comments 
         html = html.replace(/<\!\-\-.*\-\->/g, '');
         // reset DOM
@@ -26,6 +34,11 @@ class vDOM {
             }
         }
 
+        /*
+        ||========================||
+        ||        TEST UNIT       ||
+        ||========================||
+
         tmpDOM = [
             { type: 'tag', name: 'div', opt: { args: [], childs: [ 1, 2 ] } }, 
             { type: 'tag', name: 'p', opt: { args: [], childs: [ 3 ] } }, 
@@ -34,10 +47,18 @@ class vDOM {
             { type: 'tag', name: 'b', opt: { args: [], childs: [ 5 ] } }, 
             { type: 'text', content: 'some bold text' }
         ]
+        */
 
         // link
         for (var i = 0; i < tmpDOM.length; i++) {
-            
+            var inc = this.childToDOM(i, tmpDOM);
+            this.virtualDOM.push(tmpDOM[i]);
+            i += inc;
         }
+
+        // console.log(this.virtualDOM);
     }
 }
+
+/*var vdom = new vDOM();
+vdom.HtmlTovDOM();*/
