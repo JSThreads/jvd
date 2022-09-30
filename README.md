@@ -2,6 +2,8 @@
 
 The template don't change, we give the maximum content to the virtual DOM. 
 
+![image](https://user-images.githubusercontent.com/73474137/193359180-f890403b-e15c-49e6-b0fa-5f3d871ecd7b.png)
+
 ## Example
 
 ```html 
