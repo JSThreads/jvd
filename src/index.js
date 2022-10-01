@@ -1,5 +1,24 @@
-        class vDOM {
+class vDOM {
             virtualDOM = [];
+            virtualDatas = {
+                data: {
+                    i: 0
+                }
+            }
+
+            datas = new Proxy(this.virtualDatas, {
+                set: function (target, key, value) {
+                    console.log(`${key} set to ${value}`);
+                    target[key] = value;
+                    return true;
+                },
+                defineProperty(target, key, descriptor) {
+                    console.log(target)
+                    console.log(key)
+                    console.log(descriptor)
+                    return true;
+                }
+            });
 
             /*
             
@@ -39,7 +58,7 @@
                     this.virtualDOM.body.push(this.childAppend(el))
                 })
 
-                console.log(this.virtualDOM)
+                //console.log(this.virtualDOM)
             }
 
             /*
@@ -66,12 +85,24 @@
                 }
             }
 
-            render() {
-                console.log(this.renderChild(this.virtualDOM.body[0]));
+            render(target) {                    
+                this.virtualDOM.body.forEach(el => {
+                    target.appendChild(this.renderChild(el));
+                })  
             }
+
+            /*
+            
+              //================================//
+             //       Update VirtualDOM        //
+            //================================//
+
+            We update the VirtualDOM with applied changes
+
+            */
         }
 
         var vdom = new vDOM();
-        vdom.HtmlTovDOM('<div>a<lols class="a" id=b>sfdfds</lols>fds</div>');
+        vdom.HtmlTovDOM('<div><b class="a" id=b>sfdfds</b>fds</div><i class="a" id=b>sfdfds</i>');
 
-        vdom.render()
+        vdom.render(document.getElementById('app'))
