@@ -1,14 +1,16 @@
 class vDOM {
-observalbe = (target, callback, _base = []) => {
+observalbe(target, callback, _base = []) {
     for (const key in target) {
         if (typeof target[key] === 'object')
-        target[key] = this.observalbe(target[key], callback, [..._base, key])
+            target[key] = this.observalbe(target[key], callback, [..._base, key])
     }
+    var THIS = this;
     return new Proxy(target, {
         set(target, key, value) {
-        if (typeof value === 'object') value = this.observalbe(value, callback, [..._base, key])
-        callback([..._base, key], target[key] = value)
-        return value
+            if (typeof value === 'object') 
+                value = THIS.observalbe(value, callback, [..._base, key])
+            callback([..._base, key], target[key] = value)
+            return value
         }
     })
 }
