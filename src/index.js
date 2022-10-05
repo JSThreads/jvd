@@ -1,23 +1,19 @@
-class App {
+class App { 
             constructor () {
                 this.events = {};   
             }
             
             addListener (event, callback) {
-                // Check if the callback is not a function
                 if (typeof callback !== 'function') {
                     console.error(`The listener callback must be a function, the given type is ${typeof callback}`);
                     return false;
                 }
                 
-                
-                // Check if the event is not a string
                 if (typeof event !== 'string') {
                     console.error(`The event name must be a string, the given type is ${typeof event}`);
                     return false;
                 }
-                
-                // Check if this event not exists
+
                 if (this.events[event] === undefined) {
                     this.events[event] = {
                         listeners: []
@@ -28,7 +24,6 @@ class App {
             }
             
             removeListener (event, callback) {
-                // Check if this event not exists
                 if (this.events[event] === undefined) {
                     console.error(`This event: ${event} does not exist`);
                     return false;
@@ -40,7 +35,6 @@ class App {
             }
             
             dispatch (event, details) {
-                // Check if this event not exists
                 if (this.events[event] === undefined) {
                     console.error(`This event: ${event} does not exist`);
                     return false;
@@ -98,22 +92,58 @@ class App {
                     }
 
                     var last = 0; index = 0;
-                    variables.forEach(el => {
+                    for (var t = 0; t < variables.length; t++) {
+                        let el = variables[t];
                         if (last != el.index)
                             index++;
 
-                        content[index] = el[0];
+                        var key = [];
+                        var tokens = esprima.tokenize(el[0]);
+                        for (var i = 2; i < tokens.length - 3; i++) {
+                            if ((tokens[i].type == 'Keyword' && tokens[i].value == 'this') && (tokens[i + 1].type == 'Punctuator' && tokens[i + 1].value == '.') && (tokens[i + 2].type == 'Identifier' && tokens[i + 2].value == 'datas')) {
+                                i += 3
+                                while ((tokens[i].type == 'Punctuator' && tokens[i].value == '.') || tokens[i].type == 'Identifier') {
+                                    if (tokens[i].type == 'Identifier')
+                                        key.push(tokens[i].value)
+                                    i++
+                                }
+                            }
+                        }
+
+                        eval(`
+                            this.addListener('datas', (details) => {
+                                var ok = true;
+                                for (var i = 0; i < details.key; i++) {
+                                    try {
+                                        if (details.key[i] != key[i]) {
+                                            ok = false;
+                                            break;
+                                        }
+                                    } catch (e) {
+                                        ok = false;
+                                        break;
+                                    }
+                                }
+                                if (ok) {
+                                    content[`+index +`] = eval("` +el[0] + `")
+                                    vdom.render(document.getElementById('app'))
+                                }
+                            })
+                        `)
+                        content[index] = eval(el[0]); // data with listener
 
                         last = el[0].length + el.index;
                         index++;
-                    })
+                    }
 
                     return { type: 'text', content: content }
                 }
 
                 // getting childs
                 var childs = [];
-                el.childNodes.forEach(el => childs.push(this.childAppend(el)))
+                for (var t = 0; t < el.childNodes.length; t++) {
+                    childs.push(this.childAppend(el.childNodes[t]))
+                }
 
                 //getting attrs
                 const attrs = el.getAttributeNames().reduce((acc, name) => {
@@ -132,9 +162,8 @@ class App {
                     console.log(key, val)
                 });
 
-                html.body.childNodes.forEach(el => {
-                    this.virtualDOM.body.push(this.childAppend(el))
-                })
+                for (var i = 0; i < html.body.childNodes.length; i++) 
+                    this.virtualDOM.body.push(this.childAppend(html.body.childNodes[i]))
             }
 
             /*
@@ -160,7 +189,8 @@ class App {
                 }
             }
 
-            render(target) {                    
+            render(target) {           
+                target.innerHTML = ''         
                 this.virtualDOM.body.forEach(el => {
                     target.appendChild(this.renderChild(el));
                 })  
@@ -177,6 +207,6 @@ class App {
         var vdom = new App();
         vdom.HtmlTovDOM('<div><i>Italic text: {{ this.datas.num }}, {{ this.datas.text }}</i><br><b>Bold text: {{ this.datas.num }}{{ this.datas.text }}</b></div>');
 
-        vdom.datas.num = 9
+        vdom.datas.num = -1;
 
         vdom.render(document.getElementById('app'))
