@@ -102,6 +102,7 @@
                 this.target = document.querySelector(this.cssPath(cssPath, true));
             }
             childAppend(el, index, parent) {
+                console.log(parent)
                 if (el.nodeName == '#text') {
                     var content = el.data.split(/{{(.|\n)*?}}/g), variables = [...el.data.matchAll(/{{(.|\n)*?}}/g)];
 
@@ -162,7 +163,7 @@
                 // getting childs
                 var childs = [];
                 for (var t = 0; t < el.childNodes.length; t++) {
-                    childs.push(this.childAppend(el.childNodes[t], t, `${parent} > ${el.nodeName}:nth-child(${index + 1})`))
+                    childs.push(this.childAppend(el.childNodes[t], t, `${parent} > ${el.nodeName.toLowerCase()}:nth-child(${index + 1})`))
                 }
 
                 var itVal = null, ifVal = null;
@@ -198,8 +199,9 @@
                 this.virtualDOM = { head: [], body: [] };
 
                 // we need to pass the Element, index, parent 
-                for (var i = 0; i < html.body.childNodes.length; i++) 
-                    this.virtualDOM.body.push(this.childAppend(html.body.childNodes[i], i, this.target))
+                for (var i = 0; i < html.body.childNodes.length; i++) {
+                    this.virtualDOM.body.push(this.childAppend(html.body.childNodes[i], i, this.cssPath(this.target).split('>').reverse()[0].trim()))
+                }
             }
             renderChild(el) {
                 if (el.type == 'tag') {
