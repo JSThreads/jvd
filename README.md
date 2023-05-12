@@ -1,9 +1,3 @@
-# VirtualDOM 🛠
+# Jvd - just a virtualDOM 🛠
 
-*JavaScript VirtualDOM, just a VirtualDOM finally.*
-
-## How it works
-
-First we have a given template that is used to create a virtual DOM. This virutal DOM has his own propriety named `datas`, and any changes inside this propriety the DOM get updated. Just below you have a small image with some explications: 
-
-![image](https://user-images.githubusercontent.com/73474137/194297945-032de6f7-8d95-4bb1-b1ea-6c279532b3ae.png)
+Jvd is a virtualDOM written in Javascript to bind, mount, and manage your DOM like you want. The goal is to create a root based DOM what goal would be store the data to bind in the DOM in the root inside an observed object which would optimize the re-rendre of childs when updated. Roots would be useables in other threes and a hole system of props would be created.
