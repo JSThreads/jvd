@@ -1,24 +1,55 @@
-/**
- * Jvd - Just a virtual DOM
- * 
- * The goal of the project is to create a easy in use, accessible,
- * fast and optimized virtual DOM. 
- * 
- * - Each root has values used inside that are observed
- * - At each update if the child is updatable is rebuild
- *   from virtual DOM and changed in the page DOM
- * - Props can be passed to child root, as a definition,
- *   like in the case of passing js variables to those
- *   inside the DOM
- */
+class JVD {
+    constructor() {}
 
-class Element {
-    
-}
+    static createRoot(root, el, datas) {
+        let updateMap = {};
 
-class Root {
-    
-    constructor({ props: {},  }) {
+        return {
+            root: root,
+            element: el,
+            datas: datas,
+            observer: Object.observer(datas, (c) => {
+                if (updateMap[c.name]) {
+                    // use a while loop with index variable 
+                    // because the foreach lock the heap
 
+                    updateMap[c.name].forEach(el => {
+                        el.update();
+                    });
+                }
+            }),
+            render: el.render(root, datas, updateMap),
+            updateMap: updateMap
+        }
+    }
+    static createElement(props) {
+        this.JVDElement = class {
+            constructor(props) {
+                this.props = props;
+                console.log(this)
+            }
+            render(parent, datas, updateMap) {
+                this.parent = parent;
+                this.datas = datas;
+                this.updateMap = updateMap;
+            }
+        }
+
+        return new this.JVDElement(props);
     }
 }
+
+let data = {
+    a: 5,
+    b: 9
+}
+
+let root = JVD.createRoot(
+    null, 
+    JVD.createElement({ children: ["test"] }),
+    data
+)
+
+data.a = 8;
+
+console.log(root)
