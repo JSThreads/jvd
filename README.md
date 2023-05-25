@@ -1,3 +1,1 @@
-# Jvd - just a virtualDOM 🛠
-
-Jvd is a virtualDOM written in Javascript to bind, mount, and manage your DOM like you want. The goal is to create a root based DOM what goal would be store the data to bind in the DOM in the root inside an observed object which would optimize the re-rendre of childs when updated. Roots would be useables in other threes and a hole system of props would be created.
+![image](https://github.com/JSThreads/jvd/assets/73474137/cb25b798-ec43-46a7-8208-17ed2744bca1)
