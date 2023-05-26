@@ -1,3 +1,10 @@
+// like vue
+class JVDTemplate {
+    constructor(datas, template, css) {
+
+    }
+}
+
 class JVD {
     constructor() {}
 
@@ -8,16 +15,6 @@ class JVD {
             root: root,
             element: el,
             datas: datas,
-            observer: Object.observer(datas, (c) => {
-                if (updateMap[c.name]) {
-                    // use a while loop with index variable 
-                    // because the foreach lock the heap
-
-                    updateMap[c.name].forEach(el => {
-                        el.update();
-                    });
-                }
-            }),
             render: el.render(root, datas, updateMap),
             updateMap: updateMap
         }
@@ -39,17 +36,20 @@ class JVD {
     }
 }
 
-let data = {
-    a: 5,
-    b: 9
+function useState(val) {
+    let e = {
+        value: val,
+        subscribers: [],
+        subscribe(subscriber) { this.subscribers.push(subscriber) },
+        valueOf() { return this.value; },
+        toString() { return String(this.value); }
+    };
+
+    return [
+        e,
+        (val) => {
+            e.value = val;
+            e.subscribers.forEach(sub => { sub(val); });
+        }
+    ]
 }
-
-let root = JVD.createRoot(
-    null, 
-    JVD.createElement({ children: ["test"] }),
-    data
-)
-
-data.a = 8;
-
-console.log(root)
