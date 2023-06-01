@@ -1,10 +1,3 @@
-// like vue
-class JVDTemplate {
-    constructor(datas, template, css) {
-
-    }
-}
-
 class JVD {
     constructor() {}
 
@@ -40,7 +33,8 @@ function useState(val) {
     let e = {
         value: val,
         subscribers: [],
-        subscribe(subscriber) { this.subscribers.push(subscriber) },
+        subscribe(subscriber) { this.subscribers.push(subscriber); },
+        unsubscribe(subscriber) { this.subscribers.slice(this.subscribers.indexOf(subscriber), 1); },
         valueOf() { return this.value; },
         toString() { return String(this.value); }
     };
@@ -49,7 +43,26 @@ function useState(val) {
         e,
         (val) => {
             e.value = val;
-            e.subscribers.forEach(sub => { sub(val); });
+            e.subscribers.forEach(sub => { sub.update(val); });
         }
     ]
 }
+
+let [g, setG] = useState(6);
+
+class DOMElement {
+    constructor() {
+        this.template = "test"
+    }
+
+    update(t) {
+        this.template = t;
+        console.log(this)
+    }
+}
+
+console.log(g.valueOf());
+let el = new DOMElement();
+
+g.subscribe(el);
+setG(8);
