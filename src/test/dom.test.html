@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dom test</title>
+</head>
+
+<body>
+    <div id="root"></div>
+    <script>
+        let root = document.getElementById('root');
+        // console.log(root)
+
+        class A {
+            constructor() {
+                this.el = document.createElement('div');
+                this.el.innerText = 'test';
+            }
+        }
+
+        let a = new A();
+        let b = new A();
+
+        root.appendChild(a.el);
+        a.el.appendChild(b.el);
+
+        // free the element from the dom and heap
+        a.el.remove();
+        a.el = null;
+
+        console.log(a.el);
+
+    </script>
+</body>
+
+</html>
