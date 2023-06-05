@@ -2,7 +2,7 @@
   "name": "jvd",
   "version": "1.0.0",
   "description": "Just a virtual DOM",
-  "main": "index.js",
+  "main": "test.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
