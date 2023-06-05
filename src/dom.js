@@ -2,12 +2,11 @@
  * Check a problem with Node destruction 
  * */
 
-module.exports.JVD = class {
-    // all childs rerender on change without components 
-    // that has not as prop the value that changed
-    Element = class {
-
-    }
+class JVD {
+    /**
+     * Elements are immutable, their goal is just to
+     * return an HTML element at render
+     *  */
     Root = class {
 
     }
@@ -23,6 +22,43 @@ module.exports.JVD = class {
 
     }
     static createElement(tag, props, ...children) {
+        return {
+            tag: tag,
+            props: props,
+            children: children,
+            parse: {
 
+            },
+            render() {
+                let el = document.createElement(this.tag);
+
+                // setting all the props
+                for (let prop in this.props) {
+                    if (this.parse[prop]) this.parse[prop](el, this.props[prop]);
+                    else el.setAttribute(prop, this.prop[prop]);
+                }
+
+                // appending all childs
+                for (let child in this.children) {
+                    if (child.render)
+                        el.appendChild(this.children[child].render());
+                    else
+                        el.appendChild(document.createTextNode(this.children[child]));
+                }
+
+                return el;
+            }
+        };
     }
 }
+
+/**
+ * HEADER
+ *   
+ * 
+ * body
+ *   div
+ *     HEADER
+ *     MAIN
+ *     FOOTER     
+ */

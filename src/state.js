@@ -1,12 +1,16 @@
-module.exports.useState = (val) => {
-    let e = {
-        value: val,
-        subscribers: [],
-        subscribe(subscriber, name = "update") { this.subscribers.push([subscriber, name]); },
-        unsubscribe(subscriber) { this.subscribers.slice(this.subscribers.indexOf(subscriber), 1); },
-        valueOf() { return this.value; },
-        toString() { return String(this.value); }
-    };
+class State {
+    constructor(val) {
+        this.value = val;
+        this.subscribers = [];
+    }
+    subscribe(subscriber, name = "update") { this.subscribers.push([subscriber, name]); }
+    unsubscribe(subscriber) { this.subscribers.slice(this.subscribers.indexOf(subscriber), 1); }
+    valueOf() { return this.value; }
+    toString() { return String(this.value); }
+}
+
+var useState = (val) => {
+    let e = new State(val);
 
     return [
         e,
