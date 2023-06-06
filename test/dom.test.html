@@ -17,8 +17,13 @@
         console.log(`${x}`)
 
         // dom
-        let el1 = JVD.createElement('div', {}, 'test ', x);
-        console.log(el1.render())
+        let el1 = JVD.createElement('div', {},
+            JVD.createElement('b', { style: 'color:red;' }, 'test'),
+            JVD.createElement('i', {}, ' italic')
+        );
+        window.onload = () => {
+            document.querySelector('#root').appendChild(el1.renderHTML());
+        }
     </script>
 </head>
 

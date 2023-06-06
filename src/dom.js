@@ -12,14 +12,32 @@ class JVD {
     }
     // child component are only rerender if props
     Component = class {
+        // before mount
+        onMount() { }
+        // after mount
+        didMount() { }
+        // before unmount
+        onUnmount() { }
+        // after unmount
+        didUnmount() { }
+        // update
+        update() {
 
+        }
+        // render
+        render(props) {
+
+        }
     }
     Fragement = class {
 
     }
 
-    static createRoot(DOMEl, el) {
+    static createText(...children) {
 
+    }
+    static createRoot(DOMEl, el) {
+        DOMEl.appendChild(el.renderHTML(DOMEl));
     }
     static createElement(tag, props, ...children) {
         return {
@@ -29,21 +47,19 @@ class JVD {
             parse: {
 
             },
-            render() {
+            renderHTML() {
                 let el = document.createElement(this.tag);
 
                 // setting all the props
                 for (let prop in this.props) {
-                    if (this.parse[prop]) this.parse[prop](el, this.props[prop]);
-                    else el.setAttribute(prop, this.prop[prop]);
+                    if (this.parse.hasOwnProperty(prop)) this.parse[prop](el, this.props[prop]);
+                    else el.setAttribute(prop, this.props[prop]);
                 }
 
                 // appending all childs
                 for (let child in this.children) {
-                    if (child.render)
-                        el.appendChild(this.children[child].render());
-                    else
-                        el.appendChild(document.createTextNode(this.children[child]));
+                    if (this.children[child].hasOwnProperty('renderHTML')) el.appendChild(this.children[child].renderHTML());
+                    else el.appendChild(document.createTextNode(this.children[child]));
                 }
 
                 return el;
