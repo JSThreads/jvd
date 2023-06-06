@@ -6,24 +6,58 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dom test</title>
 
-    <script src="../src/dom.js"></script>
-    <script src="../src/state.js"></script>
-
+    <script src="../src/jvd.js"></script>
     <script>
-        // state
-        let [x, setX] = useState(6);
-        setX(x + 9);
+        class C extends JVD.Component {
+            onMount() {
+                // global
+                this.z = JVD.useState(4);
+            }
+            render() {
+                // local
+                let [e, setE] = JVD.useState(4);
 
-        console.log(`${x}`)
-
-        // dom
-        let el1 = JVD.createElement('div', {},
-            JVD.createElement('b', { style: 'color:red;' }, 'test'),
-            JVD.createElement('i', {}, ' italic')
-        );
-        window.onload = () => {
-            document.querySelector('#root').appendChild(el1.renderHTML());
+                return [
+                    e,
+                    setE,
+                    this.z    
+                ]  
+            }
         }
+
+        let el = {
+            tag: 'div',
+            props: null,
+            children: [
+                {component: C, props: {}, slot: []},
+                {component: C, props: {}, slot: []}
+            ],
+
+            renderHTML() {
+                this.children.forEach(c => {
+                    if (c.hasOwnProperty('component')) {
+                        // component
+
+                        let t = new c.component(c.props, c.slot);
+                        t.onMount();
+                        
+                        let a = t.render();
+                        a[2][1](8);
+
+                        t.renderHTML();
+                    } 
+                    else if (typeof c == "string") {
+                        // text
+                    }
+                    else {
+                        // element
+                    }
+                });
+            }
+        }
+
+        let r = JVD.createRoot(document.querySelector('#root'));
+        r.mount(el)
     </script>
 </head>
 
