@@ -50,10 +50,13 @@ class _JVD {
          */
         class Root {
             constructor(el) { this.p = el; }
-            mount($el) { /*this.p.appendChild();*/$el.renderHTML(this.p) }
+            // cloning the element to allow multiple app
+            mount($el) { $el = Object.assign(new JVD.Component, $el) instanceof JVD.Component ? Object.assign(new Component, $el) : structuredClone($el); /*this.p.appendChild();*/$el.renderHTML(this.p) }
         }
         this.createRoot = (el) => { return new Root(el) };
     }
 }
 
 const JVD = new _JVD();
+
+// Comparaison of dom to do
