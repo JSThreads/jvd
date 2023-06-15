@@ -8,7 +8,7 @@
 
     <script src="../src/jvd.js"></script>
     <script>
-        class C extends JVD.Component {
+        /*class C extends JVD.Component {
             onMount() {
                 // global
                 this.z = JVD.useState(4);
@@ -25,39 +25,28 @@
             }
         }
 
-        let el = {
-            tag: 'div',
-            props: null,
-            children: [
-                {component: C, props: {}, slot: []},
-                {component: C, props: {}, slot: []}
-            ],
+        let el = JVD.createElement(
+            'div',
+            null,
+            [
+                new C({ props: { onclick: (e) => { console.log(e);  } }}),
+                new C(),
+                ...['test', 89].map(() => {
 
-            renderHTML() {
-                this.children.forEach(c => {
-                    if (c.hasOwnProperty('component')) {
-                        // component
-
-                        let t = new c.component(c.props, c.slot);
-                        t.onMount();
-                        
-                        let a = t.render();
-                        a[2][1](8);
-
-                        t.renderHTML();
-                    } 
-                    else if (typeof c == "string") {
-                        // text
-                    }
-                    else {
-                        // element
-                    }
-                });
-            }
-        }
+                })
+            ]
+        )
 
         let r = JVD.createRoot(document.querySelector('#root'));
-        r.mount(el)
+        r.mount(el)*/
+
+        let a = { e: 9 }, b = { e: 0 }, c = { e: 7 }
+
+        let [v, s] = JVD.useState([9]);
+        v.push(6)
+        v.push(2, 8, 3, 1)
+        v.sort()
+        console.log(v)
     </script>
 </head>
 
