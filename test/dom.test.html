@@ -8,45 +8,83 @@
 
     <script src="../src/jvd.js"></script>
     <script>
-        /*class C extends JVD.Component {
-            onMount() {
+        class Title extends JVD.Component {
+            render() {
+                return [
+                    JVD.createElement('h1', {}, 'JVD example grade app')
+                ]  
+            }
+        }
+        class Grades extends JVD.Component {
+            constructor(props) {
+                super(props)
+
                 // global
-                this.z = JVD.useState(4);
+                JVD.store(this, 'name', 'setName', JVD.useState(props.name));
+                JVD.store(this, 'grades', 'setGrades', JVD.useState(props.grades));
             }
             render() {
                 // local
                 let [e, setE] = JVD.useState(4);
 
+                // the pattern
                 return [
-                    e,
-                    setE,
-                    this.z    
+                    new Title(),
+                    JVD.createElement('div', {},
+                    [
+                        JVD.createElement('h2', {}, this.name),
+                        JVD.createElement('div', {}, 
+                            [...this.grades.keys().map(k => {
+                                return JVD.createElement('div', {}, 
+                                [
+                                    JVD.createElement('h4', {}, k),
+                                    JVD.createElement('div', {}, this.grades.at(k).join(', '))
+                                ])
+                            })]
+                        ) 
+                    ]   
+                    )   
                 ]  
             }
         }
 
-        let el = JVD.createElement(
-            'div',
-            null,
+        let [grades, setGrades] = JVD.useState({
+            "Math": [5.5, 6, 4.5, 5, 5, 5.5],
+            "English": [5, 4.5, 5.5, 5.5, 5, 4],
+            "IT": [6, 5.5, 6, 6, 3, 5.5],
+            "French": [4, 4.5, 4.5, 5, 3.5, 4]
+        })
+
+        console.log(grades.keys().map(k => {
+            return JVD.createElement('div', {}, 
             [
-                new C({ props: { onclick: (e) => { console.log(e);  } }}),
-                new C(),
-                ...['test', 89].map(() => {
+                JVD.createElement('h4', {}, k),
+                JVD.createElement('div', {}, grades.at(k).join(', '))
+            ])
+        }))
 
-                })
-            ]
-        )
+        console.log(new Grades({ name: "Tymon", grades: {
+            "Math": [5.5, 6, 4.5, 5, 5, 5.5],
+            "English": [5, 4.5, 5.5, 5.5, 5, 4],
+            "IT": [6, 5.5, 6, 6, 3, 5.5],
+            "French": [4, 4.5, 4.5, 5, 3.5, 4]
+        }}).renderHTML())
 
-        let r = JVD.createRoot(document.querySelector('#root'));
-        r.mount(el)*/
+        console.log('======================================================')
 
-        let a = { e: 9 }, b = { e: 0 }, c = { e: 7 }
+        const proxy3 = new Proxy({
+            t: {
+                g: [0, 4, 2, 5]
+            }
+        }, {
+            get(target, prop, receiver) {
+                console.log(...arguments)
 
-        let [v, s] = JVD.useState([9]);
-        v.push(6)
-        v.push(2, 8, 3, 1)
-        v.sort()
-        console.log(v)
+                return Reflect.get(...arguments);
+            }
+        });
+
+        proxy3.t.g[1]
     </script>
 </head>
 

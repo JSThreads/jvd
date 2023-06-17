@@ -7,51 +7,90 @@ class _JVD {
             constructor(val) {
                 this.value = val;
                 this.subscribers = [];
+                this.whatchers = {};
             }
             change(fn) { return fn(this.value); }
-            subscribe(subscriber, name="update") { this.subscribers.push([subscriber, name]); }
-            unsubscribe(subscriber) { this.subscribers.slice(this.subscribers.indexOf(subscriber), 1); }
+            subscribe(subscriber) { this.subscribers.push(subscriber); }
+            unsubscribe(subscriber) { let i = this.subscribers.indexOf(subscriber); if (i > -1) this.subscribers.splice(i, 1); }
+            watch(accessor, callback) { this.whatchers.hasOwnProperty(accessor) ? this.whatchers[accessor].push(callback) : this.whatchers[accessor] = [callback]; }
+            focus(accessor, callback, oldcallback) { this.watch(accessor, callback); this.forget(accessor, oldcallback); }
+            forget(accessor, callback) { let i = this.whatchers[accessor].indexOf(callback); if (i > -1) this.whatchers[accessor].splice(i, 1); }
             valueOf() { return this.value; }
             toString() { return String(this.value); }
         }
         class Slice {
             constructor(source, accessor, pointer) {
                 this.source = source;
-                this.accessor = typeof accessor == 'object' ? [...accessor] : [accessor];
+                this.accessor = accessor;
                 this.pointer = pointer;
                 
                 if (typeof this.pointer == 'object') {
                     if (Array.isArray(this.pointer)) {
-                        this.concat = (src) => { this.pointer.concat(src); }
+                        this.concat = (src) => { 
+                            this.pointer.concat(src); 
+                            if (this.source.whatchers.hasOwnProperty(accessor)) 
+                                this.source.whatchers[accessor].forEach(el => el(accessor, source, { operation: 'concat', props: src }))
+                        }
                         this.fill = (value, start=null, end=null) => {
                             if (start == null) this.pointer.fill(value);
                             else if (end == null) this.pointer.fill(value, start);
                             else this.pointer.fill(value, start, end);
+
+                            if (this.source.whatchers.hasOwnProperty(accessor)) 
+                                this.source.whatchers[accessor].forEach(el => el(accessor, source, { operation: 'fill', props: [value, start, end] }))
                         }
-                        this.forEach = (fn) => { this.pointer.forEach(fn); }
-                        this.from = (src) => { this.pointer = Array.from(src); }
-                        this.pop = () => { this.pointer.pop(); }
-                        this.push = (...val) => { this.pointer.push(...val); }
-                        this.sort = () => { this.pointer.sort(); }
+                        this.forEach = (fn) => { 
+                            this.pointer.forEach(fn); 
+                            this.source.subscribers.forEach(sub => { sub.update(val); }); 
+                        }
+                        this.from = (src) => { 
+                            this.pointer = Array.from(src); 
+                            this.source.subscribers.forEach(sub => { sub.update(val); }); 
+                        }
+                        this.push = (...val) => { 
+                            this.pointer.push(...val); 
+                            if (this.source.whatchers.hasOwnProperty(accessor)) 
+                                this.source.whatchers[accessor].forEach(el => el(accessor, source, { operation: 'push', props: val }))
+                        }
+                        this.sort = () => { 
+                            this.pointer.sort(); 
+                            this.source.subscribers.forEach(sub => { sub.update(val); }); 
+                        }
                         this.splice = (start, deleteCount=null, ...items) => {
                             if (deleteCount == null) this.pointer.splice(start);
                             if (items.length == 0) this.pointer.splice(start, deleteCount);
                             this.pointer.splice(start, deleteCount, ...items);
-                        }
-                        this.reverse = () => { this.pointer.reverse(); }
-                        this.unshift = (...el) => { this.pointer.unshift(...el); }
 
+                            if (this.source.whatchers.hasOwnProperty(accessor)) 
+                                this.source.whatchers[accessor].forEach(el => el(accessor, source, { operation: 'splicef', props: val }))
+                        }
+                        this.reverse = () => { 
+                            this.pointer.reverse(); 
+                            if (this.source.whatchers.hasOwnProperty(accessor)) 
+                                this.source.whatchers[accessor].forEach(el => el(accessor, source, { operation: 'reverse', props: null }))
+                        }
+                        this.unshift = (...val) => { 
+                            this.pointer.unshift(...val); 
+                            if (this.source.whatchers.hasOwnProperty(accessor)) 
+                                this.source.whatchers[accessor].forEach(el => el(accessor, source, { operation: 'unshift', props: val }))
+                        }
+
+                        this.pop = () => { 
+                            if (this.source.whatchers.hasOwnProperty(accessor)) 
+                                this.source.whatchers[accessor].forEach(el => el(accessor, source, { operation: 'pop', props: null }))
+                            return { operation: 'pop', accessor: accessor, source: source, poped: this.pointer.pop() };
+                        }
                         this.with = (index, value) => { return this.pointer.with(index, value); }
                         this.values = () => { return this.pointer.values(); }
                         this.toString = () => { return this.pointer.toString(); }
                         this.toSpliced = (start, deleteCount=null, ...items) => {
                             if (deleteCount == null) return this.pointer.toSpliced(start);
                             if (items.length == 0) return this.pointer.toSpliced(start, deleteCount);
-                            return this.pointer.toSpliced(start, deleteCount, ...items);
+                            return { operation: 'splice', accessor: accessor, source: source, spliced: this.pointer.toSpliced(start, deleteCount, ...items) };
                         }
                         this.toSorted = (fn=null) => { 
                             if (fn == null) return this.pointer.toSorted(); 
-                            return this.pointer.toSorted(fn); 
+                            return { operation: 'sort', accessor: accessor, source: source, splicedsorted: this.pointer.toSorted(fn) };
                         }
                         this.toLocaleString = (str=null, options={}) => { return str == null ? this.pointer.toLocaleString() : this.pointer.toLocaleString(str, options); }
                         this.some = (fn) => { return this.pointer.some(fn); }
@@ -60,7 +99,11 @@ class _JVD {
                             if (end==null) return this.pointer.slice(start);
                             return this.pointer.slice(start, end);
                         }
-                        this.shift = () => { return this.pointer.shift(); }
+                        this.shift = () => { 
+                            if (this.source.whatchers.hasOwnProperty(accessor)) 
+                                this.source.whatchers[accessor].forEach(el => el(accessor, source, { operation: 'shift', props: null }))
+                            return this.pointer.shift(); 
+                        }
                         this.toReversed = () => { return this.pointer.toReversed(); }
                         this.reduce = (fn, init=null) => { return init == null ? this.pointer.reduce(fn) : this.pointer.reduce(fn, init); }
                         this.reduceRight = (fn, init=null) => { return init == null ? this.pointer.reduceRight(fn) : this.pointer.reduceRight(fn, init); }                        
@@ -79,7 +122,11 @@ class _JVD {
                         this.filter = (fn) => { return this.pointer.filter(fn); }
                         this.every = (fn) => { return this.pointer.every(fn); }
                         this.entries = () => { return this.pointer.entries(); }
-                        this.copyWithin = (target, start, end=null) => { return end == null ? this.pointer.copyWithin(target, start) : this.pointer.copyWithin(target, start, end); }
+                        this.copyWithin = (target, start, end=null) => { 
+                            if (this.source.whatchers.hasOwnProperty(accessor)) 
+                                this.source.whatchers[accessor].forEach(el => el(accessor, source, { operation: 'copyWithin', props: [target, start, end] }))
+                            return end == null ? this.pointer.copyWithin(target, start) : this.pointer.copyWithin(target, start, end); 
+                        }
                         this.length = () => { return this.pointer.length; }
                     }
                     else {
@@ -116,7 +163,8 @@ class _JVD {
                     }
 
                     this.at = (accessor) => {
-                        return new Slice(this.source, [...this.accessor, accessor], this.pointer[accessor]);
+                        if (typeof this.pointer == 'object') return new Slice(this.source, [...this.accessor, accessor], Array.isArray(this.pointer) ? this.pointer.at(accessor) : this.pointer[accessor]);
+                        return null;
                     } 
                 }
             }
@@ -225,7 +273,8 @@ class _JVD {
                 }
 
                 e.at = (accessor) => {
-                    return new Slice(e.value, [accessor], e.value);
+                    if (typeof e.value == 'object') return new Slice(e, [accessor], Array.isArray(e.value) ? e.value.at(accessor) : e.value[accessor]);
+                    return null;
                 } 
             }
         
@@ -233,7 +282,7 @@ class _JVD {
                 e,
                 (val) => {
                     e.value = val;
-                    e.subscribers.forEach(sub => { sub[0][sub[1]](val); });
+                    e.subscribers.forEach(sub => { sub.update(val); });
                 }
             ]
         }
@@ -253,7 +302,7 @@ class _JVD {
 
             }
         }
-        this.createElement = ({tag, props, children}) => { return new Element({ tag, props, children }); }
+        this.createElement = (tag, props, children) => { return new Element({ tag, props, children }); }
 
         /**
          * Component
@@ -272,11 +321,7 @@ class _JVD {
             }
             render() { return []; }
             renderHTML() {
-                let r = [];
-
-                console.log(this.render());
-
-                return r;
+                
             }
         }
         this.Component = Component;
@@ -296,6 +341,13 @@ class _JVD {
             }
         }
         this.createRoot = (el) => { return new Root(el) };
+
+        this.store = (p, val, set, fn) => {
+            let [a, b] = fn; 
+
+            p[val] = a; 
+            p[set] = b; 
+        };
     }
 }
 
