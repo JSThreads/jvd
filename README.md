@@ -5,4 +5,4 @@
 - Qwick like states and reactivity system
 - JSX templating
 - Vanilla JSX use
-- CSS interpreter for optimized style rendering
+- CSS interpreter for optimized style rendering 
